@@ -15,12 +15,22 @@ pub fn build(b: *std.Build) void {
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
 
+    // Adds webview dependency
+    const webview = b.dependency("webview", .{});
+
     const exe = b.addExecutable(.{
         .name = "tragents",
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
+
+    exe.root_module.addImport("webview", webview.module("webview"));
+
+    exe.linkLibC();
+    exe.linkLibrary(webview.artifact("webviewStatic"));
+
+    //exe.linkSystemLibrary("webview");
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default

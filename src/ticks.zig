@@ -6,6 +6,11 @@ pub const TickSettings = packed struct {
     volume: f32,
 };
 
+pub const TickBias = enum {
+    Bullish,
+    Bearish,
+};
+
 pub const Tick = struct {
     open: f32,
     high: f32,
@@ -21,5 +26,9 @@ pub const Tick = struct {
             .close = settings.close,
             .volume = settings.volume,
         };
+    }
+
+    pub fn get_bias(tick: *Tick) TickBias {
+        return if (tick.close > tick.open) TickBias.Bullish else TickBias.Bearish;
     }
 };
