@@ -20,7 +20,7 @@
       output.textContent = 'Loading...';
       try {
         const res = await window.echo('Hello, World');
-        output.textContent = res.count;
+        output.textContent = JSON.stringify(res, null, 2);
 
       } catch (error) {
         output.textContent = error.message;

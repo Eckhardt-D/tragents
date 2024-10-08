@@ -4,21 +4,32 @@ const Gen = @import("generator.zig");
 const WebView = @import("webview").WebView;
 
 const Data = struct {
-    count: u32 = 0,
     w: WebView,
-};
-
-const DispatchData = struct {
-    count: u32 = 0,
+    tick_data: struct {
+        ticks: *std.ArrayList(Ticks.Tick),
+    },
 };
 
 //const FPS = 10;
-fn cb(x: [:0]const u8, y: [:0]const u8, ctx: ?*anyopaque) void {
+fn cb(x: [:0]const u8, _: [:0]const u8, ctx: ?*anyopaque) void {
     const ctx_data: *Data = @ptrCast(@alignCast(ctx));
-    std.debug.print("Callback X: {d}\n", .{x});
-    std.debug.print("Callback Y: {s}\n", .{y});
-    std.debug.print("Callback CTX: {any}\n", .{ctx_data.count});
-    ctx_data.w.ret(x, 0, "{\"count\": 1}");
+
+    // Todo: size appropriately
+    var buf: [4 * 1024 * 1024]u8 = undefined;
+    var fba = std.heap.FixedBufferAllocator.init(&buf);
+    var json = std.ArrayList(u8).init(fba.allocator());
+
+    std.json.stringify(ctx_data.tick_data.ticks.items, .{}, json.writer()) catch |err| {
+        std.debug.print("Failed to stringify the data: {any}\n", .{err});
+        return;
+    };
+
+    const ticks: [:0]const u8 = fba.allocator().dupeZ(u8, json.items) catch |err| {
+        std.debug.print("Failed to dupe the data: {any}\n", .{err});
+        return;
+    };
+
+    ctx_data.w.ret(x, 0, ticks);
 }
 
 pub fn main() !void {
@@ -47,9 +58,13 @@ pub fn main() !void {
     const max_size: usize = 4 * 1024 * 1024;
     const content: [:0]const u8 = try fd.readToEndAllocOptions(heap_allocator, max_size, null, 512, 0);
 
+    for (0..generator.capacity) |_| {
+        _ = try generator.tick();
+    }
+
     const data = Data{
-        .count = 0,
         .w = w,
+        .tick_data = .{ .ticks = &generator.tick_buffer },
     };
 
     const ctx: *anyopaque = @ptrCast(@constCast(&data));
