@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <script>
+    window.requireJS("charts.js");
+  </script>
 </head>
 <body>
   <h1>Hello, World</h1> 
@@ -12,7 +15,12 @@
 
   <script type="module">
     const output = window.output;
-    output.textContent = window.echo.toString();
+
+    const interval = setInterval(() => {
+      if (!window.LightweightCharts) return;
+      output.textContent = window.LightweightCharts.toString();
+      clearInterval(interval);
+    }, 200)
 
     window.reporter.addEventListener('click', report);
 

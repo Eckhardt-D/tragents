@@ -1,36 +1,37 @@
 const std = @import("std");
 const Ticks = @import("ticks.zig");
 const Gen = @import("generator.zig");
+const Rpc = @import("rpc-bindings.zig");
 const WebView = @import("webview").WebView;
 
-const Data = struct {
-    w: WebView,
-    tick_data: struct {
-        ticks: *std.ArrayList(Ticks.Tick),
-    },
-};
-
-//const FPS = 10;
-fn cb(x: [:0]const u8, _: [:0]const u8, ctx: ?*anyopaque) void {
-    const ctx_data: *Data = @ptrCast(@alignCast(ctx));
-
-    // Todo: size appropriately
-    var buf: [4 * 1024 * 1024]u8 = undefined;
-    var fba = std.heap.FixedBufferAllocator.init(&buf);
-    var json = std.ArrayList(u8).init(fba.allocator());
-
-    std.json.stringify(ctx_data.tick_data.ticks.items, .{}, json.writer()) catch |err| {
-        std.debug.print("Failed to stringify the data: {any}\n", .{err});
-        return;
-    };
-
-    const ticks: [:0]const u8 = fba.allocator().dupeZ(u8, json.items) catch |err| {
-        std.debug.print("Failed to dupe the data: {any}\n", .{err});
-        return;
-    };
-
-    ctx_data.w.ret(x, 0, ticks);
-}
+//const Data = struct {
+//    w: WebView,
+//    tick_data: struct {
+//        ticks: *std.ArrayList(Ticks.Tick),
+//    },
+//};
+//
+////const FPS = 10;
+//fn cb(x: [:0]const u8, _: [:0]const u8, ctx: ?*anyopaque) void {
+//    const ctx_data: *Data = @ptrCast(@alignCast(ctx));
+//
+//    // Todo: size appropriately
+//    var buf: [4 * 1024 * 1024]u8 = undefined;
+//    var fba = std.heap.FixedBufferAllocator.init(&buf);
+//    var json = std.ArrayList(u8).init(fba.allocator());
+//
+//    std.json.stringify(ctx_data.tick_data.ticks.items, .{}, json.writer()) catch |err| {
+//        std.debug.print("Failed to stringify the data: {any}\n", .{err});
+//        return;
+//    };
+//
+//    const ticks: [:0]const u8 = fba.allocator().dupeZ(u8, json.items) catch |err| {
+//        std.debug.print("Failed to dupe the data: {any}\n", .{err});
+//        return;
+//    };
+//
+//    ctx_data.w.ret(x, 0, ticks);
+//}
 
 pub fn main() !void {
     const heap_allocator = std.heap.page_allocator;
@@ -62,16 +63,15 @@ pub fn main() !void {
         _ = try generator.tick();
     }
 
-    const data = Data{
-        .w = w,
-        .tick_data = .{ .ticks = &generator.tick_buffer },
+    const context_obj = Rpc.Context{
+        .w = &w,
     };
 
-    const ctx: *anyopaque = @ptrCast(@constCast(&data));
+    const ctx: *anyopaque = @ptrCast(@constCast(&context_obj));
 
+    w.bind("requireJS", Rpc.require_callback, ctx);
     w.setTitle("Zig App");
     w.setSize(1024, 720, .None);
-    w.bind("echo", cb, ctx);
     w.setHtml(content);
     w.run();
 
