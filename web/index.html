@@ -4,36 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
-  <script>
-    window.requireJS("charts.js");
-  </script>
 </head>
 <body>
   <h1>Hello, World</h1> 
   <button id="reporter">Click me</button>
   <p id="output"></p>
 
+  <script src="/test.js"></script>
+
   <script type="module">
     const output = window.output;
-
-    const interval = setInterval(() => {
-      if (!window.LightweightCharts) return;
-      output.textContent = window.LightweightCharts.toString();
-      clearInterval(interval);
-    }, 200)
 
     window.reporter.addEventListener('click', report);
 
     async function report() {
       output.textContent = 'Loading...';
-      try {
-        const res = await window.echo('Hello, World');
-        output.textContent = JSON.stringify(res, null, 2);
-
-      } catch (error) {
-        output.textContent = error.message;
-        alert(error.message);
-      }
     }
   </script>
 </body>

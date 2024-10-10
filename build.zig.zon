@@ -27,6 +27,10 @@
             .url = "https://github.com/thechampagne/webview-zig/archive/refs/heads/main.tar.gz",
             .hash = "1220160fdecbf364434879b7dc3473303cc0d774096b16fef731da3c86741542aecb",
         },
+        .httpz = .{
+            .url = "git+https://github.com/karlseguin/http.zig?ref=master#e55f3f788aef9314859254938e766777c5dcd582",
+            .hash = "1220f824cd85cca0a9ee540ddfa7240c032b4abd44085b5005b45f72fd5787d28510",
+        },
     },
     .paths = .{
         "build.zig",

@@ -18,6 +18,12 @@ pub fn build(b: *std.Build) void {
     // Adds webview dependency
     const webview = b.dependency("webview", .{});
 
+    // Adds httpz dependency
+    const httpz = b.dependency("httpz", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
     const exe = b.addExecutable(.{
         .name = "tragents",
         .root_source_file = b.path("src/main.zig"),
@@ -26,6 +32,7 @@ pub fn build(b: *std.Build) void {
     });
 
     exe.root_module.addImport("webview", webview.module("webview"));
+    exe.root_module.addImport("httpz", httpz.module("httpz"));
 
     exe.linkLibC();
     exe.linkLibrary(webview.artifact("webviewStatic"));
