@@ -1,10 +1,13 @@
 const std = @import("std");
 const httpz = @import("httpz");
 
+// Created in the spawned thread, not accessed
+// in main thread.
 const App = struct {
     // TODO: make "web/" configurable from the server instance
     pub fn handle(_: *App, req: *httpz.Request, res: *httpz.Response) void {
         const allocator = std.heap.page_allocator;
+
         const url = req.url.path;
         const filename = url[1..];
 
@@ -38,45 +41,34 @@ const App = struct {
     }
 };
 
-fn spawn_listen(server: *httpz.Server(*App), host: []const u8, port: u16) !void {
+fn spawn_server(host: []const u8, port: u16) !httpz.Server(*App) {
+    const allocator = std.heap.page_allocator;
+    var app = App{};
+
+    var server = try httpz.Server(*App).init(allocator, .{
+        .address = host,
+        .port = port,
+        .request = .{
+            .buffer_size = 10 * 1024,
+        },
+    }, &app);
+
     std.debug.print("Listening on http://{s}:{d}\n", .{ host, port });
-    try server.listen();
+
+    _ = try server.listenInNewThread();
+    return server;
 }
 
 pub const FileServer = struct {
     port: u16 = 3000,
     host: []const u8 = "127.0.0.1",
     root: []const u8 = "web",
-    listening: bool = false,
-    server: httpz.Server(*App),
+
     const Self = @This();
-
-    pub fn init(allocator: std.mem.Allocator, port: ?u16, host: ?[]const u8, root: ?[]const u8) !FileServer {
-        const _port = port orelse 3000;
-        const _host = host orelse "127.0.0.1";
-        const _root = root orelse "web";
-
-        var app = App{};
-
-        const server = try httpz.Server(*App).init(allocator, .{
-            .address = _host,
-            .port = _port,
-        }, &app);
-
-        return .{
-            .port = _port,
-            .host = _host,
-            .root = _root,
-            .server = server,
-        };
-    }
 
     /// Spins up a new thread to listen for incoming requests
     /// to not block the main thread that renders the window.
-    pub fn listen(self: *Self) !std.Thread {
-        self.listening = true;
-        std.debug.print("Initializing server, {s} {d}\n", .{ self.host, self.port });
-        const thread = try std.Thread.spawn(.{}, spawn_listen, .{ &self.server, self.host, self.port });
-        return thread;
+    pub fn spawn(self: *Self) !httpz.Server(*App) {
+        return try spawn_server(self.host, self.port);
     }
 };

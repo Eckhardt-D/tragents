@@ -8,12 +8,8 @@ pub fn main() !void {
     const heap_allocator = std.heap.page_allocator;
     var generator: Gen.Generator = undefined;
 
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    const allocator = gpa.allocator();
-
-    var server = try FileServer.init(allocator, null, null, null);
-    const server_thread = try server.listen();
-    defer server_thread.join();
+    var file_server = FileServer{};
+    _ = try file_server.spawn();
 
     _ = generator.init(heap_allocator, 100, .{
         .open = 1.0123,
