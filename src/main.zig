@@ -38,21 +38,24 @@ fn get_ticks(e: *webui.Event) void {
         };
     }
 
-    var json_buffer: [4 * 1024 * 1024]u8 = undefined;
+    // 100 KiB Buffer
+    var json_buffer: [100 * 1024]u8 = undefined;
     var fba = std.heap.FixedBufferAllocator.init(&json_buffer);
-    const alloc = fba.allocator();
-    var json = std.ArrayList(u8).init(alloc);
+    var json = std.ArrayList(u8).init(fba.allocator());
+
+    defer json.deinit();
 
     std.json.stringify(generator.tick_buffer.items, .{}, json.writer()) catch |err| {
         std.debug.print("Failed to stringify ticks: {}\n", .{err});
         return;
     };
 
-    const json_string: [:0]const u8 = alloc.dupeZ(u8, json.items) catch |err| {
-        std.debug.print("Failed to dupe json: {}\n", .{err});
-        return;
-    };
+    //json.writer().writeByte(0) catch |err| {
+    //    std.debug.print("Failed to write null terminator: {}\n", .{err});
+    //    return;
+    //};
 
+    const json_string: [:0]const u8 = json.items[0 .. json.items.len - 1 :0];
     e.returnString(json_string);
 }
 
