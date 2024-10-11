@@ -8,13 +8,14 @@
 </head>
 
 <body>
-  <h1>Chartin' baby</h1>
+  <h1>Render?</h1>
   <div style="width: 500px; height: 400px;" id="container"></div>
 
   <script src="/test.js"></script>
   <script src="/charts.js"></script>
 
   <script>
+    // Works when visiting the local server @ browser, but not in GTK webview :(
     const chartOptions = {layout: {textColor: 'black', background: {type: 'solid', color: 'white'}}};
     const chart = window.LightweightCharts.createChart(document.getElementById('container'), chartOptions);
     const areaSeries = chart.addAreaSeries({
