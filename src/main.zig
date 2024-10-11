@@ -50,10 +50,10 @@ fn get_ticks(e: *webui.Event) void {
         return;
     };
 
-    //json.writer().writeByte(0) catch |err| {
-    //    std.debug.print("Failed to write null terminator: {}\n", .{err});
-    //    return;
-    //};
+    json.writer().writeByte(0) catch |err| {
+        std.debug.print("Failed to write null terminator: {}\n", .{err});
+        return;
+    };
 
     const json_string: [:0]const u8 = json.items[0 .. json.items.len - 1 :0];
     e.returnString(json_string);
