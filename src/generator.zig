@@ -52,7 +52,7 @@ pub const Generator = struct {
     fn calculateNextTick(self: *Generator) Ticks.Tick {
         std.debug.assert(self.tick_buffer.items.len > 0);
         const prev_tick = self.tick_buffer.items[self.tick_buffer.items.len - 1];
-        const max_percent_change: f32 = 0.0001;
+        const max_percent_change: f32 = 0.001;
         const max_volume_change: f32 = 0.05;
         const seed: u64 = @intCast(std.time.milliTimestamp());
         var rand = std.Random.DefaultPrng.init(seed);
