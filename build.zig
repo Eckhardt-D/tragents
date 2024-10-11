@@ -15,13 +15,12 @@ pub fn build(b: *std.Build) void {
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
 
-    // Adds webview dependency
-    const webview = b.dependency("webview", .{});
-
-    // Adds httpz dependency
-    const httpz = b.dependency("httpz", .{
+    // Adds webui which can use modern browsers (needed for canvas)
+    const zig_webui = b.dependency("zig-webui", .{
         .target = target,
         .optimize = optimize,
+        .enable_tls = false, // whether enable tls support
+        .is_static = true, // whether static link
     });
 
     const exe = b.addExecutable(.{
@@ -31,13 +30,9 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    exe.root_module.addImport("webview", webview.module("webview"));
-    exe.root_module.addImport("httpz", httpz.module("httpz"));
-
     exe.linkLibC();
-    exe.linkLibrary(webview.artifact("webviewStatic"));
 
-    //exe.linkSystemLibrary("webview");
+    exe.root_module.addImport("webui", zig_webui.module("webui"));
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default

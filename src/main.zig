@@ -1,38 +1,20 @@
 const std = @import("std");
 const Ticks = @import("ticks.zig");
 const Gen = @import("generator.zig");
-const WebView = @import("webview").WebView;
-const FileServer = @import("http.zig").FileServer;
+const webui = @import("webui");
+
+fn close(_: *webui.Event) void {
+    std.debug.print("Close event\n", .{});
+    webui.exit();
+}
 
 pub fn main() !void {
-    const heap_allocator = std.heap.page_allocator;
-    var generator: Gen.Generator = undefined;
+    var win = webui.newWindow();
+    _ = webui.setDefaultRootFolder("web");
 
-    var file_server = FileServer{};
-    _ = try file_server.spawn();
+    _ = win.bind("close_app", close);
+    _ = win.showBrowser("index.html", .ChromiumBased);
 
-    _ = generator.init(heap_allocator, 100, .{
-        .open = 1.0123,
-        .high = 1.0143,
-        .low = 1.0118,
-        .close = 1.0132,
-        .volume = 1000,
-    }) catch |err| {
-        std.debug.print("Failed to initialize the generator, out of memory?", .{});
-        return err;
-    };
-
-    defer generator.deinit();
-
-    const w = WebView.create(false, null);
-    defer w.destroy();
-
-    for (0..generator.capacity) |_| {
-        _ = try generator.tick();
-    }
-
-    w.setTitle("Zig App");
-    w.setSize(1024, 720, .None);
-    w.navigate("http://127.0.0.1:3000/index.html");
-    w.run();
+    webui.wait();
+    webui.clean();
 }

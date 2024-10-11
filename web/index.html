@@ -4,16 +4,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/webui.js"></script>
   <title>Document</title>
 </head>
 
 <body>
-  <h1>Render?</h1>
-  <div style="width: 500px; height: 400px;" id="container"></div>
+  <h1>Tragents Beta</h1>
+  <button id="close_app">CLOSE</button>
+  <div style="width: 800px; height: 400px;" id="container"></div>
 
-  <script src="/test.js"></script>
+
   <script src="/charts.js"></script>
-
   <script>
     // Works when visiting the local server @ browser, but not in GTK webview :(
     const chartOptions = {layout: {textColor: 'black', background: {type: 'solid', color: 'white'}}};

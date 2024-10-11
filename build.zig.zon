@@ -23,13 +23,9 @@
     // Once all dependencies are fetched, `zig build` no longer requires
     // internet connectivity.
     .dependencies = .{
-        .webview = .{
-            .url = "https://github.com/thechampagne/webview-zig/archive/refs/heads/main.tar.gz",
-            .hash = "1220160fdecbf364434879b7dc3473303cc0d774096b16fef731da3c86741542aecb",
-        },
-        .httpz = .{
-            .url = "git+https://github.com/karlseguin/http.zig?ref=master#e55f3f788aef9314859254938e766777c5dcd582",
-            .hash = "1220f824cd85cca0a9ee540ddfa7240c032b4abd44085b5005b45f72fd5787d28510",
+        .@"zig-webui" = .{
+            .url = "https://github.com/webui-dev/zig-webui/archive/main.tar.gz",
+            .hash = "1220f7cb9608ca0b5946bee76bb9fe3867aa5cab47990d9cf02339d89dc7ae1d9a32",
         },
     },
     .paths = .{
